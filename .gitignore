@@ -1,0 +1,42 @@
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+
+# 编辑残留与本地备份
+*.bak
+$out/
+.git-备份/
+
+# 本机配置（含用户的 DA 镜像路径，不入库）
+config.bat
+
+# 本地会话与运行日志
+.gui_session.json
+client.log
+
+# 代理工作缓存
+.workbuddy/
+
+# 临时目录与输出
+tmp*/
+test_build/
+staging/
+_probe*.png
+shots/
+
+# 运行产物：体积大、可重跑，不入库
+runs/
+downloads/
+*.img
+
+# 历史档案：不发布、不再入库
+analysis/
+
+# 厂商 DA 镜像与设备转储：专有、体积大，不入库
+*.bin
+*.mbn
+dump*/
+
+# 本地临时凭证与缓存
+.gh_*.json

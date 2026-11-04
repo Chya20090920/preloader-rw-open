@@ -1,0 +1,290 @@
+{
+  "schema": 1,
+  "name": "mtk-da2-official",
+  "_note": "MTK DA2 官方命令面。内核只认这张表：命令名、拼帧、回合内可能出现的 <info>/<key>、注册探针都在这里。换一份 DA 固件 = 复制本文件改这里，再用 PANE_TABLE（或 GUI 资源页「命令表」一行）指过去。",
+  "transport": {
+    "_note": "设备上行帧里用于分类的符号。换固件若改了这些字面量，只改这里。",
+    "start": "CMD:START",
+    "end": "CMD:END",
+    "download": "CMD:DOWNLOAD-FILE",
+    "upload": "CMD:UPLOAD-FILE",
+    "filesys": "CMD:FILE-SYS-OPERATION",
+    "notice": "CMD:",
+    "ok": "OK\u0000"
+  },
+  "handover": {
+    "_note": "2nd-DA 下载请求的 <info> 取值（设备怎么说都认）。",
+    "da2_info": ["2nd-DA", "DA2", "2nd_DA"]
+  },
+  "filesys": {
+    "_note": "设备在回合里做文件查询时的键名；EXISTS 的否定应答。",
+    "exists": "EXISTS",
+    "file_size": "FILE-SIZE",
+    "not_exists_reply": "OK@NOT-EXISTS\u0000"
+  },
+  "boot": {
+    "_note": "BOOT-TO 的默认落地地址与 DA2 装载地址；KernelConfig 显式给了就以那里为准。",
+    "at": "0x40000000",
+    "jmp": "0x40000000",
+    "da2_mem": "0xF5D7794"
+  },
+  "probe": [
+    {
+      "command": "GET-HW-INFO",
+      "target": "MEM://0x1a63a020:0x200000",
+      "expect": 484,
+      "save_as": "probe_hw_info.bin"
+    }
+  ],
+  "commands": [
+    {
+      "name": "SET-RUNTIME-PARAMETER",
+      "phase": "pre",
+      "args": [],
+      "build": "set_runtime_parameter"
+    },
+    {
+      "name": "HOST-SUPPORTED-COMMANDS",
+      "phase": "pre",
+      "args": [],
+      "build": "host_supported"
+    },
+    {
+      "name": "NOTIFY-INIT-HW",
+      "phase": "both",
+      "args": [],
+      "build": {"template": "<command>CMD:NOTIFY-INIT-HW</command><arg></arg></da>"}
+    },
+    {
+      "name": "SET-HOST-INFO",
+      "phase": "both",
+      "args": ["da/arg/info"],
+      "build": "set_host_info"
+    },
+    {
+      "name": "GET-SYS-PROPERTY",
+      "phase": "both",
+      "args": ["da/arg/key", "da/arg/target_file"],
+      "build": "get_sys_property",
+      "pushes": ["sys-prop"]
+    },
+    {
+      "name": "BOOT-TO",
+      "phase": "pre",
+      "args": ["da/arg/at_address", "da/arg/jmp_address", "da/arg/source_file"],
+      "build": "boot_to"
+    },
+    {
+      "name": "CAN-HIGHER-USB-SPEED",
+      "phase": "pre",
+      "args": ["da/arg/target_file"],
+      "build": "can_higher_speed"
+    },
+    {
+      "name": "SECURITY-GET-DEV-FW-INFO",
+      "phase": "pre",
+      "args": ["da/arg/target_file"],
+      "build": "security_get_fw_info",
+      "pushes": ["DEV-FW-INFO"]
+    },
+    {
+      "name": "SECURITY-SET-FLASH-POLICY",
+      "phase": "pre",
+      "args": ["da/arg/source_file"],
+      "build": "security_set_flash_policy",
+      "pulls": ["SEC-POLICY"]
+    },
+    {
+      "name": "GET-HW-INFO",
+      "phase": "post",
+      "args": ["da/arg/target_file"],
+      "build": {"template": "<command>CMD:GET-HW-INFO</command><arg><target_file>{target_file}</target_file></arg></da>"},
+      "pushes": ["HW-INFO"]
+    },
+    {
+      "name": "GET-UFS-INFO",
+      "_note": "设备侧已知缺陷：收满申报长度后不发 CMD:END，此后不再服务命令。只允许当探针单独发。",
+      "phase": "post",
+      "args": ["da/arg/target_file"],
+      "build": {"template": "<command>CMD:GET-UFS-INFO</command><arg><target_file>{target_file}</target_file></arg></da>"},
+      "pushes": ["UFS-INFO"]
+    },
+    {
+      "name": "GET-DA-INFO",
+      "phase": "post",
+      "args": ["da/arg/target_file"],
+      "build": {"template": "<command>CMD:GET-DA-INFO</command><arg><target_file>{target_file}</target_file></arg></da>"},
+      "pushes": ["DA-INFO"]
+    },
+    {
+      "name": "GET-DOWNLOADED-IMAGE-FEEDBACK",
+      "phase": "post",
+      "args": ["da/arg/target_file"],
+      "build": {"template": "<command>CMD:GET-DOWNLOADED-IMAGE-FEEDBACK</command><arg><target_file>{target_file}</target_file></arg></da>"},
+      "pushes": ["dev"]
+    },
+    {
+      "name": "SECURITY-GET-AUTH-TOKEN",
+      "phase": "post",
+      "args": ["da/arg/target_file"],
+      "build": {"template": "<command>CMD:SECURITY-GET-AUTH-TOKEN</command><arg><target_file>{target_file}</target_file></arg></da>"},
+      "pushes": ["DEV-CERT-INFO"]
+    },
+    {
+      "name": "READ-PARTITION-TABLE",
+      "phase": "post",
+      "args": ["da/arg/target_file"],
+      "build": {"template": "<command>CMD:READ-PARTITION-TABLE</command><arg><target_file>{target_file}</target_file></arg></da>"},
+      "pushes": ["partition-table"]
+    },
+    {
+      "name": "READ-EFUSE",
+      "phase": "post",
+      "args": ["da/arg/target_file"],
+      "build": {"template": "<command>CMD:READ-EFUSE</command><arg><target_file>{target_file}</target_file></arg></da>"},
+      "pushes": ["efuse"]
+    },
+    {
+      "name": "READ-PARTITION",
+      "phase": "post",
+      "args": ["da/arg/partition", "da/arg/target_file"],
+      "build": "read_partition",
+      "pushes": ["<partition>"]
+    },
+    {
+      "name": "READ-FLASH",
+      "phase": "post",
+      "args": ["da/arg/partition", "da/arg/offset", "da/arg/length", "da/arg/target_file"],
+      "build": {"template": "<command>CMD:READ-FLASH</command><arg><partition>{partition}</partition><offset>0x{offset:x}</offset><length>0x{length:x}</length><target_file>{target_file}</target_file></arg></da>"},
+      "pushes": ["<partition>"]
+    },
+    {
+      "name": "EMMC-CONTROL",
+      "phase": "post",
+      "args": ["da/arg/function", "da/arg/target_file"],
+      "build": "emmc_control",
+      "pushes": ["LIFE-CYCLE-STATUS", "RPMB-KEY-STATUS"]
+    },
+    {
+      "name": "WRITE-PARTITION",
+      "phase": "post",
+      "args": ["da/arg/partition", "da/arg/pre_erase", "da/arg/source_file"],
+      "build": "write_partition",
+      "pulls": [".sig", "LocalFile"],
+      "fs_keys": ["EXISTS", "EXISTS"]
+    },
+    {
+      "name": "WRITE-FLASH",
+      "phase": "post",
+      "args": ["da/arg/partition", "da/arg/offset", "da/arg/source_file"],
+      "build": "write_flash",
+      "pulls": ["LocalFile"],
+      "fs_keys": ["FILE-SIZE"]
+    },
+    {
+      "name": "WRITE-PARTITIONS",
+      "phase": "post",
+      "args": ["da/arg/source_file"],
+      "build": "write_partitions",
+      "pulls": ["scatter-file", ".sig", "LocalFile"],
+      "fs_keys": ["EXISTS", "EXISTS"]
+    },
+    {
+      "name": "WRITE-EFUSE",
+      "phase": "post",
+      "args": ["da/arg/source_file"],
+      "build": "write_efuse",
+      "pulls": ["efuse"]
+    },
+    {
+      "name": "DEBUG:UFS",
+      "phase": "post",
+      "args": [
+        "da/arg/function",
+        "da/arg/source_file",
+        "da/arg/switch",
+        "da/arg/write_turbo/size",
+        "da/arg/write_turbo/reduction",
+        "da/arg/hpb/ctrl_mode",
+        "da/arg/hpb/pinned_region_count",
+        "da/arg/hpb/pinned_region_start_index",
+        "da/arg/hpb/size",
+        "da/arg/split_last_lua/size",
+        "da/arg/split_last_lua/type"
+      ],
+      "build": "debug_ufs",
+      "pulls": ["FW"]
+    },
+    {
+      "name": "SET-RSC",
+      "phase": "post",
+      "args": ["da/arg/key", "da/arg/source_file"],
+      "build": "set_rsc",
+      "pulls": ["RSC file"]
+    },
+    {
+      "name": "WRITE-PRIVATE-CERT",
+      "phase": "post",
+      "args": ["da/arg/source_file"],
+      "build": "write_private_cert",
+      "pulls": ["cert"]
+    },
+    {
+      "name": "SECURITY-WRITE-AUTH",
+      "phase": "post",
+      "args": ["da/arg/partition", "da/arg/offset", "da/arg/source_file"],
+      "build": "security_write_auth",
+      "pulls": ["WRITE-AUTH"]
+    },
+    {
+      "name": "SECURITY-SET-ALLINONE-SIGNATURE",
+      "phase": "post",
+      "args": ["da/arg/source_file"],
+      "build": "security_set_allinone_signature",
+      "pulls": ["Signature"]
+    },
+    {
+      "name": "FLASH-ALL",
+      "phase": "post",
+      "args": ["da/arg/path_separator", "da/arg/source_file"],
+      "build": "flash_all",
+      "pulls": ["scatter-file", ".sig", "LocalFile"],
+      "fs_keys": ["EXISTS", "EXISTS"],
+      "levels": 2
+    },
+    {
+      "name": "FLASH-UPDATE",
+      "phase": "post",
+      "args": ["da/arg/path_separator", "da/arg/source_file", "da/arg/backup_folder"],
+      "build": "flash_update",
+      "pulls": ["scatter-file", "FW-RECORD"],
+      "pushes": ["<partition>", "record-file"],
+      "fs_keys": ["EXISTS", "MKDIR"],
+      "levels": 2
+    },
+    {
+      "name": "ERASE-PARTITION",
+      "phase": "post",
+      "args": ["da/arg/partition"],
+      "build": {"template": "<command>CMD:ERASE-PARTITION</command><arg><partition>{partition}</partition></arg></da>"}
+    },
+    {
+      "name": "ERASE-FLASH",
+      "phase": "post",
+      "args": ["da/arg/partition", "da/arg/offset", "da/arg/length"],
+      "build": {"template": "<command>CMD:ERASE-FLASH</command><arg><partition>{partition}</partition><offset>0x{offset:x}</offset><length>0x{length:x}</length></arg></da>"}
+    },
+    {
+      "name": "REBOOT",
+      "phase": "post",
+      "args": ["da/arg/action"],
+      "build": {"template": "<command>CMD:REBOOT</command><arg><action>{action}</action></arg></da>"}
+    },
+    {
+      "name": "SET-BOOT-MODE",
+      "phase": "post",
+      "args": ["da/arg/mode", "da/arg/connect_type", "da/arg/mobile_log", "da/arg/adb"],
+      "build": "set_boot_mode"
+    }
+  ]
+}

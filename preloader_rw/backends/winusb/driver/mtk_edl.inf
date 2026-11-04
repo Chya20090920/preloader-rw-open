@@ -1,0 +1,35 @@
+; MTK preloader / EDL 的 WinUSB 安装 INF。
+; 只匹配一个 HardwareID：USB\VID_0E8D&PID_2000。
+; 不匹配其他 HardwareID，不使用 filter driver，不改写系统驱动绑定。
+
+[Version]
+Signature="$Windows NT$"
+Class=USBDevice
+ClassGuid={88BAE032-5A81-49f0-BC3D-A4FF138216D6}
+Provider=%ProviderName%
+DriverVer=10/19/2026,1.0.0.0
+
+; Manufacturer 段
+[Manufacturer]
+%ProviderName%=MtkEdl,NTamd64,NTarm64
+
+; Models 段
+[MtkEdl.NTamd64]
+%DeviceName%=MtkEdl_Install, USB\VID_0E8D&PID_2000
+
+[MtkEdl.NTarm64]
+%DeviceName%=MtkEdl_Install, USB\VID_0E8D&PID_2000
+
+; DDInstall 段：复用系统自带 winusb.inf
+[MtkEdl_Install.NT]
+Include=winusb.inf
+Needs=WINUSB.NT
+
+; WinUSB service 段
+[MtkEdl_Install.NT.Services]
+Include=winusb.inf
+Needs=WINUSB.NT.Services
+
+[Strings]
+ProviderName="MTK EDL"
+DeviceName="MTK Preloader / EDL (WinUSB)"

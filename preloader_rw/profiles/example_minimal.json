@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "example-minimal",
+  "_note": "格式样例，不是可用配置：这里只示范一条命令怎么登记。真要用自己的 DA 固件，请复制 mtk_official.json 改，命令集合必须与你那份 DA2 的受限命令一致（镜像里 grep 'CMD:' 可得到清单），探针也必须是那份 DA 真能应答的受限命令。命令行 python scripts\\check_table.py <本文件> 可离线自检。",
+  "transport": {
+    "_note": "可整段省略——省略即用官方值。只有当你的固件改了这些字面量时才需要写。",
+    "start": "CMD:START",
+    "end": "CMD:END",
+    "download": "CMD:DOWNLOAD-FILE",
+    "upload": "CMD:UPLOAD-FILE",
+    "filesys": "CMD:FILE-SYS-OPERATION"
+  },
+  "probe": [
+    {
+      "command": "GET-DA-INFO",
+      "target": "MEM://0x10000000:0x1000",
+      "expect": 0,
+      "save_as": "probe_da_info.bin"
+    }
+  ],
+  "commands": [
+    {
+      "name": "GET-DA-INFO",
+      "phase": "post",
+      "args": ["da/arg/target_file"],
+      "build": {"template": "<command>CMD:GET-DA-INFO</command><arg><target_file>{target_file}</target_file></arg></da>"},
+      "pushes": ["DA-INFO"]
+    },
+    {
+      "name": "REBOOT",
+      "phase": "post",
+      "args": ["da/arg/action"],
+      "build": {"template": "<command>CMD:REBOOT</command><arg><action>{action}</action></arg></da>"}
+    }
+  ]
+}
