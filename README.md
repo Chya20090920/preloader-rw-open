@@ -1,8 +1,8 @@
 # Preloader_Rw
 
-> **适用范围：仅限 vivo 厂商的 MTK 平台设备。** 其他品牌、其他平台的机型均不在
-> 支持范围；同为 MTK 芯片但品牌不同的机器，分区布局、签名与 DA 版本都可能不同，
-> 即使换表换载荷也不保证可用。
+> **实测范围：只在 vivo 的 MTK 平台设备上跑通过。** 其他厂商或其他平台的机型
+> 没有验证过，它们的架构可能不一样（分区布局、签名流程、DA 版本），用之前请先
+> 自行确认。
 
 MTK（联发科）平台 Preloader / DA（Download Agent）阶段的刷写与读取工具，  
 带 PySide6 图形界面。主机侧用 Python 实现 DA1/DA2 协议栈，设备端始终运行上传固件。
@@ -30,8 +30,9 @@ DA2 的原生命令回合。
 
 ## 支持平台
 
-- 品牌：**仅 vivo 厂商的 MTK 平台设备**（MT6895/MT6896 类 UFS 机型上开发并验证）。
-  其他品牌不适用；非 MTK 平台的 vivo 机型同样不适用。
+- 芯片：MTK（联发科）preloader/DA 架构的设备。
+- 实测：**只在 vivo 的 MTK 平台机型上验证过**（MT6895/MT6896 类 UFS）。
+  其他厂商、其他平台的设备架构可能不同，未做验证，需自行确认后再用。
 - 主机：Windows 10/11 x64，Python 3.10+。
 - 传输：libusb（`preloader_rw/backends/libusb/` 自带 `libusb-1.0.dll`）  
   或 WinUSB（`preloader_rw/backends/winusb/driver/` 自带 `mtk_edl.inf` 安装包）。
@@ -44,8 +45,8 @@ DA2 的原生命令回合。
 
     preloader_rw/profiles/mtk_official.json
 
-换自己的 DA 固件 = 换表 + 换载荷，内核代码一行不改（仍限于 vivo MTK 平台内
-换版本，不构成对其他品牌的支持）：
+换自己的 DA 固件 = 换表 + 换载荷，内核代码一行不改（目前只在 vivo 的 DA 上
+验证过；换其他厂商的固件，表要按那边实际的命令面自己写）：
 
     set "PANE_TABLE=C:\my\my_da2.json"
     set "PANE_PAYLOAD=C:\my\my_route.py"
@@ -156,7 +157,7 @@ GUI 页面：资源（DA 镜像与载荷）、刷写（设备枚举状态行、�
 | `preloader_rw/payloads/` | 载荷 = 工作流（默认 `route.py`：官方 DA1→DA2→签名流程；`minimal.py` 为可替换性示例；`kernel_api_t.h` 为原生载荷 ABI）           |
 | `preloader_rw/profiles/` | 命令表：内核认识哪些命令、帧怎么拼、探针发哪条（默认 `mtk_official.json`；`example_minimal.json` 为格式样例）                       |
 | `scripts/`               | 启动脚本、示例配置与命令表自检（`启动程序.bat` / `launch_gui.bat` / `_find_python.py` / `config.example.bat` / `check_table.py`）  |
-| `data/`                  | 参考分区表（取自 vivo MTK 机型；刷写页初始显示，设备读回后替换）                                                       |
+| `data/`                  | 参考分区表（实测取自 vivo 机型；刷写页初始显示，设备读回后替换）                                                       |
 
 ## 免责声明
 
