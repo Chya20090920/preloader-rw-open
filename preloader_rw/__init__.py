@@ -6,6 +6,13 @@ backends（USB 传输）、payloads（工作流载荷，按路径加载）。
 """
 
 import os as _os
+import sys as _sys
 
-# 仓库根（data/ scripts/ 与本包所在层）。
-REPO_ROOT = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
+if getattr(_sys, "frozen", False):
+    # 打包分发：资源（profiles/ payloads/ backends/ data/）随 exe 一起解到
+    # PyInstaller 的 _MEIPASS，`preloader_rw/...` 这类相对路径以它为根。
+    REPO_ROOT = getattr(_sys, "_MEIPASS",
+                        _os.path.dirname(_os.path.abspath(_sys.executable)))
+else:
+    # 仓库根（data/ scripts/ 与本包所在层）。
+    REPO_ROOT = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))

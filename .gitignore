@@ -40,3 +40,8 @@ dump*/
 
 # 本地临时凭证与缓存
 .gh_*.json
+
+# 打包产物
+build/
+dist/
+*.spec

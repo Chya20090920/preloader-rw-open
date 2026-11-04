@@ -16,6 +16,22 @@ ROOT = REPO_ROOT
 LOG = os.path.join(ROOT, "client.log")
 
 
+def _hide_console_window():
+    """打包版是控制台子系统（壳子进程要有真 stdio），GUI 起来后把这个窗口收掉。
+
+    子进程用 CREATE_NO_WINDOW 启动，不受影响；源码运行没有控制台可收，直接跳过。
+    """
+    if not getattr(sys, "frozen", False):
+        return
+    try:
+        import ctypes
+        hwnd = ctypes.windll.kernel32.GetConsoleWindow()
+        if hwnd:
+            ctypes.windll.user32.ShowWindow(hwnd, 0)
+    except Exception:
+        pass
+
+
 def _redirect_when_headless():
     if sys.stdout is not None and sys.stderr is not None:
         return
@@ -33,6 +49,7 @@ def _redirect_when_headless():
 
 def main(argv=None):
     from .app import main as app_main
+    _hide_console_window()
     return app_main(argv)
 
 

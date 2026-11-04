@@ -45,6 +45,9 @@ class RelayBridge(QObject):
     def __init__(self, argv=None, cwd=None, python=None, parent=None):
         super().__init__(parent)
         self._argv = list(argv) if argv else ["-m", "preloader_rw.relay", "--json"]
+        if argv is None and getattr(sys, "frozen", False):
+            # 冻结包里没有 `-m`：让同一个 exe 以 --relay 把自己拉起来。
+            self._argv = ["--relay", "--json"]
         from preloader_rw import REPO_ROOT
         self._cwd = cwd or REPO_ROOT
         self._python = python or sys.executable
