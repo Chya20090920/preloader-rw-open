@@ -4,6 +4,7 @@ rem Example user config for Preloader_Rw. Copy this file to "config.bat"
 rem AT THE REPO ROOT (one level up from scripts\) and edit the paths.
 rem config.bat is git-ignored.
 rem Keep this file pure ASCII if your paths allow it; cmd parses .bat by bytes.
+rem Scope: vivo MTK platform devices only. Other brands/platforms are unsupported.
 rem ===========================================================================
 
 rem --- Required: DA1 / DA2 images -------------------------------------------
